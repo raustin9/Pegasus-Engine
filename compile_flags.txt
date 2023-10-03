@@ -1,0 +1,9 @@
+-Iengine
+-Iengine/src
+-Iengine/src/platform
+-Iengine/src/core
+-shared
+-g 
+-fdeclspec 
+-fPIC
+-DP_PLATFORM_LINUX
