@@ -1,6 +1,7 @@
 #include <test.h>
 #include <core/logger.h>
 #include <core/assert.h>
+#include <platform/platform.h>
 
 int 
 main(void) {
@@ -11,7 +12,15 @@ main(void) {
   P_DEBUG("test message: %f", 3.14f);
   P_TRACE("test message: %f", 3.14f);
 
-  P_ASSERT(1 == 0);
+  platform_state state;
+
+  if (platform_startup(&state, "Pegasus Engine Testbed", 100, 100, 1280, 720)) {
+    while (TRUE) {
+      platform_pump_messages(&state);
+    }
+  }
+
+  platform_shutdown(&state);
   
 
   return 0;

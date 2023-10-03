@@ -1,5 +1,6 @@
 #include "logger.h"
 #include "assert.h"
+#include "platform/platform.h"
 
 // TODO: temporary
 #include <stdio.h>
@@ -32,26 +33,30 @@ log_output(log_level level, const char* message, ...) {
     "[TRACE]"
   };
 
-  // b8 is_error = level < LOG_LEVEL_WARN;
+  b8 is_error = level < LOG_LEVEL_WARN;
 
   // Massive buffer to avoid runtime allocations that are slow
-  char err_message[32000];
+  const i32 msg_length = 32000;
+  char err_message[msg_length];
   memset(err_message, 0, sizeof(err_message));
 
   // Format the message
   __builtin_va_list arg_ptr;
   va_start(arg_ptr, message);
-  vsnprintf(err_message, 32000, message, arg_ptr);
+  vsnprintf(err_message, msg_length, message, arg_ptr);
   va_end(arg_ptr);
 
   // Prepend the error level to the message string
-  char out_message[32000];
+  char out_message[msg_length];
   memset(out_message, 0, sizeof(out_message));
   sprintf(out_message, "%s%s\n", level_strings[level], err_message);
 
   // Print the error message
-  // TODO: will become platform specific
-  printf("%s", out_message);
+  if (is_error) {
+    platform_console_write_error(out_message, level);
+  } else {
+    platform_console_write(out_message, level);
+  }
 }
 
 // ASSERTIONS //
