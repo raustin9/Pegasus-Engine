@@ -1,5 +1,4 @@
 #include "platform.h"
-#include <bits/time.h>
 
 #if P_PLATFORM_LINUX
 
