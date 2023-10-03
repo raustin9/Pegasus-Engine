@@ -190,12 +190,12 @@ platform_pump_messages(platform_state* pstate) {
     b8 quit_flagged = FALSE;
 
     // Poll the events
-    event = xcb_poll_for_event(state->connection);
+    // event = xcb_poll_for_event(state->connection);
     while (event != 0) {
         event = xcb_poll_for_event(state->connection);
         if (event == 0) {
             break;
-        }
+        } 
 
         switch (event->response_type & ~0x80) {
             case XCB_KEY_PRESS:
@@ -215,6 +215,7 @@ platform_pump_messages(platform_state* pstate) {
             case XCB_CLIENT_MESSAGE: {
                 cm = (xcb_client_message_event_t*)event;
                 
+                P_INFO("Should be destroying window");
                 // Window close
                 if (cm->data.data32[0] == state->wm_delete_win) {
                     quit_flagged = TRUE;
@@ -257,7 +258,7 @@ void platform_console_write(const char* message, u8 color) {
         "1;33",
         "1;32",
         "1;34",
-        "1;30"
+        "1;37"
     };
 
     printf("\033[%sm%s\033[0m", color_strings[color], message);
@@ -271,7 +272,7 @@ platform_console_write_error(const char* message, u8 color) {
         "1;33",
         "1;32",
         "1;34",
-        "1;30"
+        "1;37"
     };
 
     // Potentially: use stderr

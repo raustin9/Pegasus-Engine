@@ -50,13 +50,13 @@ P_API void log_output(log_level level, const char* message, ...);
 #endif
 
 #if LOG_DEBUG_ENABLED == 1
-#define P_DEBUG(message, ...) log_output(LOG_LEVEL_INFO, message, ##__VA_ARGS__);
+#define P_DEBUG(message, ...) log_output(LOG_LEVEL_DEBUG, message, ##__VA_ARGS__);
 #else
 #define P_DEBUG(message, ...)
 #endif
 
 #if LOG_TRACE_ENABLED == 1
-#define P_TRACE(message, ...) log_output(LOG_LEVEL_INFO, message, ##__VA_ARGS__);
+#define P_TRACE(message, ...) log_output(LOG_LEVEL_TRACE, message, ##__VA_ARGS__);
 #else
 #define P_TRACE(message, ...)
 #endif
