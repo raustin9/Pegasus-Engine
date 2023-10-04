@@ -4,7 +4,7 @@ Welcome to the Pegasus Game Engine!
 This is a game engine that I am building to learn how to make platform specific applications along with making a graphics application.
 
 Some helpful resources I am using to help build this:
-- P.A. Minerva Tutorial
+- P.A. Minerva Tutorial [[https://paminerva.github.io/docs/LearnVulkan/LearnVulkan]]
 - Kohi Game engine series on youtube
 - Brendan Galea Vulkan Game Engine series
 
