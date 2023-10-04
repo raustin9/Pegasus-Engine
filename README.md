@@ -3,6 +3,11 @@
 Welcome to the Pegasus Game Engine!
 This is a game engine that I am building to learn how to make platform specific applications along with making a graphics application.
 
+Some helpful resources I am using to help build this:
+- P.A. Minerva Tutorial
+- Kohi Game engine series on youtube
+- Brendan Galea Vulkan Game Engine series
+
 ### Overview
 In previous engines that I have made, I have used GLFW in order to handle windowing and input. This is a cross platform API, but to better learn how this is handled on each platform, I am not using that in this engine. I will be using an X server for windowing on linux, and the native Windows API for windowing on Windows. 
 
