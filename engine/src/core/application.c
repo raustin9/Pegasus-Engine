@@ -2,7 +2,10 @@
 #include "game_types.h"
 
 #include "platform/platform.h"
+#include "core/pmemory.h"
 #include "logger.h"
+
+#include <string.h>
 
 typedef struct application_state {
     game* game_inst;
@@ -66,6 +69,10 @@ application_create(game* game_inst) {
 
 b8
 application_run() {
+    char* mem_usage = get_memory_usage_str();
+    P_INFO(mem_usage);
+    pfree(mem_usage, strlen(mem_usage), MEMORY_TAG_STRING);
+
     while (app_state.is_running) {
         if (!platform_pump_messages(&app_state.platform)) {
             app_state.is_running = FALSE;
