@@ -4,6 +4,7 @@
 #include "platform/platform.h"
 #include "core/pmemory.h"
 #include "core/event.h"
+#include "core/input.h"
 #include "logger.h"
 
 #include <string.h>
@@ -32,6 +33,7 @@ application_create(game* game_inst) {
 
     // Initialize subsystems
     initialize_logging();
+    input_initialize();
 
     // TODO: remove this
     P_FATAL("test message: %f", 3.14f);
@@ -97,11 +99,17 @@ application_run() {
                 app_state.is_running = FALSE;
                 break;
             }
+
+            /// NOTE: input update/state copying should always be handled
+            ///       after any input should be recorded. IE before this line
+            ///       As a safety, input is the last thing to be updated before the frame ends
+            input_update(0);
         }
     }
     app_state.is_running = FALSE; // ensure that we begin shutdown process with correct information
 
     event_shutdown();
+    input_shutdown();
     platform_shutdown(&app_state.platform);
 
     return TRUE;
