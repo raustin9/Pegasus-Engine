@@ -159,7 +159,7 @@ application_on_key(u16 code, void* sender, void* listener_inst, event_context co
             // Example for checking A key
             P_DEBUG("Explicit - A key pressed");
         } else {
-            P_DEBUG("'%s' key pressed in window", key_code);
+            P_DEBUG("'%c' key pressed in window", key_code);
         }
     } else if (code == EVENT_CODE_KEY_RELEASED) {
         u16 key_code = context.data.u16[0];
