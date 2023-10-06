@@ -52,6 +52,7 @@ void
 input_process_key(keys key, b8 pressed) {
   // Only handle if the state has actually changed
   if (state.keyboard_current.keys[key] != pressed) {
+    P_INFO("GOT TO PROCESS_KEY");
     // Update internal state
     state.keyboard_current.keys[key] = pressed;
 
