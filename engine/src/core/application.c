@@ -3,6 +3,7 @@
 
 #include "platform/platform.h"
 #include "core/pmemory.h"
+#include "core/event.h"
 #include "logger.h"
 
 #include <string.h>
@@ -42,6 +43,12 @@ application_create(game* game_inst) {
 
     app_state.is_running = TRUE;
     app_state.is_suspended = FALSE;
+
+    // Initialize event system
+    if (!event_initialize()) {
+        P_ERROR("Event system could not initialize. Application cannot continue");
+        return FALSE;
+    }
 
     if (!platform_startup(
             &app_state.platform, 
@@ -94,6 +101,7 @@ application_run() {
     }
     app_state.is_running = FALSE; // ensure that we begin shutdown process with correct information
 
+    event_shutdown();
     platform_shutdown(&app_state.platform);
 
     return TRUE;
