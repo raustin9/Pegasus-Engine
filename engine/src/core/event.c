@@ -2,6 +2,7 @@
 
 #include "core/pmemory.h"
 #include "containers/darray.h"
+#include "core/logger.h"
 
 typedef struct registered_event {
   void* listener;
@@ -76,7 +77,6 @@ event_register(u16 code, void* listener, PFN_on_event on_event) {
   event.listener = listener;
   event.callback = on_event;
   darray_push(state.registered[code].events, event);
-
   return TRUE;
 }
 
@@ -92,6 +92,7 @@ event_unregister(u16 code, void* listener, PFN_on_event on_event) {
   }
 
   u64 registered_count = darray_length(state.registered[code].events);
+  // P_INFO("UR: LENGTH = %i", registered_count);
   for (u64 i = 0; i < registered_count; i++) {
     registered_event ev = state.registered[code].events[i];
     if (ev.listener == listener && ev.callback == on_event) {
@@ -116,7 +117,7 @@ event_fire(u16 code, void* sender, event_context context) {
   }
 
   u64 registered_count = darray_length(state.registered[code].events);
-  for (u64 i = 0; i < registered_count; i++) {
+  for (u64 i = 0; i < registered_count; ++i) {
     registered_event ev = state.registered[code].events[i];
     if (ev.callback(code, sender, ev.listener, context)) {
       // Message has been handled, do nto send to other listeners

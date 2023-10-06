@@ -17,7 +17,7 @@ _darray_create(u64 length, u64 stride) {
   pset_memory(new_array, 0, header_size + array_size);
   new_array[DARRAY_CAPACITY] = length;
   new_array[DARRAY_LENGTH] = 0;
-  new_array[DARRAY_STRIDE] = 0;
+  new_array[DARRAY_STRIDE] = stride;
   return (void*)(new_array + DARRAY_FIELD_LENGTH); // add field length to get to where the elements are allocated
 }
 
@@ -100,7 +100,7 @@ _darray_pop_at(void* array, u64 index, void* dest) {
   }
 
   u64 addr = (u64)array;
-  pcopy_memory(dest, (void*)(addr = (index * stride)), stride);
+  pcopy_memory(dest, (void*)(addr + (index * stride)), stride);
 
   // If not on the last element, snip out the entry and copy the rest indward
   if (index != length-1) {

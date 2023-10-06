@@ -5,6 +5,7 @@
 // Only compile if building on windows
 #if P_PLATFORM_WINDOWS
 #include "core/logger.h"
+#include "core/input.h"
 
 
 #include <windows.h>
@@ -216,14 +217,15 @@ LRESULT CALLBACK win32_process_message(
   WPARAM w_param, 
   LPARAM l_param
 ) {
+  // P_DEBUG("GOT TO PROCMSG");
   switch(msg) {
     case WM_ERASEBKGND:
       // Notify the OS that erasing the screen will be handling the application
       return 1;
     case WM_CLOSE:
       // TODO: fire an event for the application to quit
-      DestroyWindow(hwnd);
-      // return 0;
+      // DestroyWindow(hwnd);
+      return 0;
       break;
     case WM_DESTROY:
       PostQuitMessage(0);
@@ -242,23 +244,29 @@ LRESULT CALLBACK win32_process_message(
     case WM_KEYUP:
     case WM_SYSKEYUP: {
       // Key pressed/released
-      // b8 pressd = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN);
-      // TODO: input processing
+      
+      b8 pressed = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN);
+      keys key = (u16)w_param;
 
-
+      // Pass to the input subsystem for processing
+      // P_INFO("GOT TO KEYDOWN/UP");
+      input_process_key(key, pressed);
     } break;
     case WM_MOUSEMOVE: {
       // i32 x_position = GET_X_LPARAM(l_param);
       // i32 y_position = GET_Y_LPARAM(l_param);
-      // // TODO: input processing
+      i32 x_pos = GET_X_LPARAM(l_param);
+      i32 y_pos = GET_Y_LPARAM(l_param);
+
+      input_process_mouse_move(x_pos, y_pos);
     } break;
     case WM_MOUSEWHEEL: {
-      // i32 z_delta = GET_WHEEL_DELTA_WPARAM(w_param);
-      // if (z_delta != 0) {
-      //   // flatten input to -1 or 1
-      //   z_delta = (z_delta < 0) ? -1 : 1;
-      //   // TODO: input processing
-      // }
+      i32 z_delta = GET_WHEEL_DELTA_WPARAM(w_param);
+      if (z_delta != 0) {
+        // flatten input to -1 or 1
+        z_delta = (z_delta < 0) ? -1 : 1;
+        input_process_mouse_wheel(z_delta);
+      }
     } break;
 
     // Mouse buttons
@@ -268,8 +276,27 @@ LRESULT CALLBACK win32_process_message(
     case WM_LBUTTONUP:
     case WM_MBUTTONUP:
     case WM_RBUTTONUP: {
-      // b8 pressed = (msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN || msg == WM_MBUTTONDOWN);
-      // // TODO: input processing
+      b8 pressed = (msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN || msg == WM_MBUTTONDOWN);
+      buttons mouse_button = BUTTON_MAX_BUTTONS;
+      switch (msg) {
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONUP:
+          mouse_button = BUTTON_LEFT;
+          break;
+        case WM_MBUTTONDOWN:
+        case WM_MBUTTONUP:
+          mouse_button = BUTTON_MIDDLE;
+          break;
+        case WM_RBUTTONDOWN:
+        case WM_RBUTTONUP:
+          mouse_button = BUTTON_RIGHT;
+          break;
+      }
+
+      // Pass to the input subsystem
+      if (mouse_button != BUTTON_MAX_BUTTONS) {
+        input_process_button(mouse_button, pressed);
+      }
     } break;
   }
 
