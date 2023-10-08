@@ -7,16 +7,16 @@
 
 #include "containers/darray.h"
 #include "vulkan_platform.h"
-// #include "platform/platform.h"
+#include "platform/platform.h"
 #include <vulkan/vk_platform.h>
-#include <vulkan/vulkan_core.h>
+// #include <vulkan/vulkan_core.h>
 
 static vulkan_context context;
 
 // Foward declare our debug message callback function
 VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-    VkDebugUtilsMessageTypeFlagBitsEXT message_types,
+    VkDebugUtilsMessageTypeFlagsEXT message_types,
     const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
     void* user_data);
 
@@ -165,7 +165,7 @@ vulkan_renderer_backend_end_frame(renderer_backend* backend, f32 delta_time) {
 VKAPI_ATTR VkBool32 VKAPI_CALL
 vk_debug_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-    VkDebugUtilsMessageTypeFlagBitsEXT message_types,
+    VkDebugUtilsMessageTypeFlagsEXT message_types,
     const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
     void* user_data) {
     switch (message_severity) {

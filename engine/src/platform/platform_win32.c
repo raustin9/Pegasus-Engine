@@ -11,6 +11,7 @@
 
 
 #include <windows.h>
+#include <vulkan/vulkan.h>
 #include <windowsx.h> // param input extraction
 #include <stdlib.h>
 
