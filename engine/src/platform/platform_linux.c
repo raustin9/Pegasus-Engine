@@ -7,6 +7,8 @@
 #include "core/logger.h"
 #include "core/input.h"
 #include "core/event.h"
+#include "containers/darray.h"
+#include "renderer/vulkan/vulkan_platform.h"
 
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -346,6 +348,12 @@ platform_sleep(u64 ms) {
         }
         usleep((ms % 1000) * 1000);
     #endif
+}
+
+// Get platform required extension names
+void
+platform_get_required_extension_names(const char*** ext_darray) {
+    darray_push(*ext_darray, &"VK_KHR_xcb_surface"); // can use _xlib_ instead of _xcb_ if using xlib
 }
 
 // Long ass switch statement to

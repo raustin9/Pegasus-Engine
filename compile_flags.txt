@@ -7,3 +7,4 @@
 -fdeclspec 
 -fPIC
 -DP_PLATFORM_LINUX
+-D_DEBUG
