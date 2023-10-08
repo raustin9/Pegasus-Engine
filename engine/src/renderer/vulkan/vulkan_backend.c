@@ -10,7 +10,7 @@ vulkan_renderer_backend_initialize(renderer_backend* backend, const char* applic
   context.allocator = 0; 
   // Setup the vulkan instance
   VkApplicationInfo app_info = {VK_STRUCTURE_TYPE_APPLICATION_INFO};
-  app_info.apiVersion = VK_API_VERSION_1_3;
+  app_info.apiVersion = VK_API_VERSION_1_2;
   app_info.pApplicationName = application_name;
   app_info.applicationVersion = VK_MAKE_VERSION(1,0,0);
   app_info.pEngineName = "Pegasus Engine";
