@@ -139,7 +139,7 @@ platform_pump_messages(platform_state *pstate) {
   // Takes messages from the queue and pump it to the application
   while (PeekMessageA(&message, NULL, 0, 0, PM_REMOVE)) {
     TranslateMessage(&message);
-    DispatchMessage(&message);
+    DispatchMessageA(&message);
   }
 
   return TRUE;

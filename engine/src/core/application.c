@@ -6,6 +6,9 @@
 #include "core/event.h"
 #include "core/input.h"
 #include "logger.h"
+#include "clock.h"
+
+#include "renderer/renderer_frontend.h"
 
 #include <string.h>
 
@@ -16,6 +19,7 @@ typedef struct application_state {
     platform_state platform;
     i16 width;
     i16 height;
+    clock clock;
     f64 last_time;
 } application_state;
 
@@ -35,6 +39,7 @@ application_create(game* game_inst) {
     app_state.game_inst = game_inst;
 
     // Initialize subsystems
+    // initialize_memory();
     initialize_logging();
     input_initialize();
 
@@ -70,6 +75,13 @@ application_create(game* game_inst) {
         return FALSE;
     }
 
+    // P_TRACE("GOT HERE");
+    // Renderer startup
+    if (!renderer_initialize(game_inst->app_config.name, &app_state.platform)) {
+        P_FATAL("Unable to initialize renderer. Aborting application");
+        return FALSE;
+    }
+
     // Initialize the game
     if (!app_state.game_inst->initialize(app_state.game_inst)) {
         P_FATAL("Game failed to initialize");
@@ -85,6 +97,13 @@ application_create(game* game_inst) {
 
 b8
 application_run() {
+    clock_start(&app_state.clock);
+    clock_update(&app_state.clock);
+    app_state.last_time = app_state.clock.elapsed;
+    f64 running_time = 0;
+    u8 frame_count = 0;
+    f64 target_frame_seconds = 1.0F / 60; // 60fps
+
     char* mem_usage = get_memory_usage_str();
     P_INFO(mem_usage);
     pfree(mem_usage, strlen(mem_usage), MEMORY_TAG_STRING);
@@ -95,22 +114,54 @@ application_run() {
         }
 
         if (!app_state.is_suspended) {
-            if (!app_state.game_inst->update(app_state.game_inst, (f32)0)) {
+            clock_update(&app_state.clock);
+            f64 current_time = app_state.clock.elapsed;
+            f64 delta = (current_time - app_state.last_time);
+            f64 frame_start_time = platform_get_absolute_time();
+
+            if (!app_state.game_inst->update(app_state.game_inst, (f32)delta)) {
                 P_FATAL("Game update failed. Shutting down");
                 app_state.is_running = FALSE;
                 break;
             }
 
-            if (!app_state.game_inst->render(app_state.game_inst, (f32)0)) {
+            // Call the game's render routine
+            if (!app_state.game_inst->render(app_state.game_inst, (f32)delta)) {
                 P_FATAL("Game render failed. Shutting down");
                 app_state.is_running = FALSE;
                 break;
             }
 
+            /// TODO: refactor packet creation
+            render_packet packet;
+            packet.delta_time = delta;
+            renderer_draw_frame(&packet);
+
+            f64 frame_end_time = platform_get_absolute_time();
+            f64 frame_elapsed_time = frame_end_time - frame_start_time;
+            running_time += frame_elapsed_time;
+            f64 remaining_seconds = target_frame_seconds - frame_elapsed_time;
+
+            if (remaining_seconds > 0) {
+                u64 remaining_ms = (remaining_seconds * 1000);
+
+                // If there is time left
+                // give it back to the OS
+                b8 limit_frames = FALSE;
+                if (remaining_ms > 0 && limit_frames) {
+                    platform_sleep(remaining_ms - 1);
+                }
+
+                frame_count++;
+            }
+
             /// NOTE: input update/state copying should always be handled
             ///       after any input should be recorded. IE before this line
             ///       As a safety, input is the last thing to be updated before the frame ends
-            input_update(0);
+            input_update(delta);
+
+            // Update the last time
+            app_state.last_time = current_time;
         }
     }
     app_state.is_running = FALSE; // ensure that we begin shutdown process with correct information
@@ -121,6 +172,7 @@ application_run() {
     
     event_shutdown();
     input_shutdown();
+    renderer_shutdown();
     platform_shutdown(&app_state.platform);
     P_INFO("APPLICATION SHUTTING DOWN");
 
