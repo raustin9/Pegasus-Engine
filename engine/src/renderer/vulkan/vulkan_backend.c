@@ -153,7 +153,18 @@ vulkan_renderer_backend_shutdown(renderer_backend* backend) {
         func(context.instance, context.debug_messenger, context.allocator);
     }
 
+    P_DEBUG("Destroying vulkan device");
     vulkan_device_destroy(&context);
+
+    P_DEBUG("Destroying vulkan surface");
+    if (context.surface) {
+      vkDestroySurfaceKHR(
+        context.instance,
+        context.surface,
+        context.allocator
+      );
+      context.surface = NULL;
+    }
     
     P_DEBUG("Destroying Vulkan instance...");
     vkDestroyInstance(context.instance, context.allocator);
