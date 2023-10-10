@@ -1,6 +1,7 @@
 #include "renderer/vulkan/vulkan_backend.h"
-#include "assert.h"
 #include "vulkan_types.inl"
+#include "vulkan_device.h"
+#include "assert.h"
 
 #include "core/logger.h"
 #include "core/pstring.h"
@@ -9,7 +10,6 @@
 #include "vulkan_platform.h"
 #include "platform/platform.h"
 #include <vulkan/vk_platform.h>
-// #include <vulkan/vulkan_core.h>
 
 static vulkan_context context;
 
@@ -123,7 +123,22 @@ vulkan_renderer_backend_initialize(renderer_backend* backend, const char* applic
     VK_CHECK(func(context.instance, &debug_create_info, context.allocator, &context.debug_messenger));
     P_DEBUG("Vulkan debugger created.");
 #endif /* _DEBUG */
-    
+  
+    // Create surface
+    P_DEBUG("Creating Vulkan surface...");
+    if (!platform_create_vulkan_surface(pstate, &context)) {
+        P_ERROR("Unable to create Vulkan surface");
+        return FALSE;
+    }
+    P_DEBUG("Vulkan surface created.");
+
+
+    // Create device
+    if (!vulkan_device_create(&context)) {
+        P_ERROR("Unable to create device");
+        return FALSE;
+    }
+
     P_INFO("Vulkan Renderer Initialized Successfully");
     return TRUE;
 }
