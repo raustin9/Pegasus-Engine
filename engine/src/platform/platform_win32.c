@@ -186,6 +186,7 @@ platform_console_write(const char* message, u8 color) {
   u64 length = strlen(message);
   LPDWORD number_written = 0; // pointer to number of chars written
   WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), message, (DWORD)length, number_written, 0);
+  SetConsoleTextAttribute(console_handle, 0);
 }
 
 // Write errors to the console
