@@ -1,6 +1,8 @@
 #pragma once
 
 #include "defines.h"
+struct platform_state;
+struct vulkan_context;
 
 // Create the surface vulkan will render to
 b8 platform_create_vulkan_surface(

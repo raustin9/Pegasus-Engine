@@ -229,7 +229,7 @@ platform_create_vulkan_surface(
     vulkan_context* context) {
     internal_state *state = (internal_state*)pstate->internal_state;
 
-    VkWin32SurfaceCreateInfoKHR create_info = {VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO};
+    VkWin32SurfaceCreateInfoKHR create_info = {VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR};
     create_info.hinstance = state->h_instance;
     create_info.hwnd = state->hwnd;
 
