@@ -152,6 +152,8 @@ vulkan_renderer_backend_shutdown(renderer_backend* backend) {
             (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(context.instance, "vkDestroyDebugUtilsMessengerEXT");
         func(context.instance, context.debug_messenger, context.allocator);
     }
+
+    vulkan_device_destroy(&context);
     
     P_DEBUG("Destroying Vulkan instance...");
     vkDestroyInstance(context.instance, context.allocator);
