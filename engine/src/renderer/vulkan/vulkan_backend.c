@@ -1,4 +1,4 @@
-#include "renderer/vulkan/vulkan_backend.h"
+#include "vulkan_backend.h"
 #include "vulkan_device.h"
 #include "vulkan_swapchain.h"
 #include "vulkan_renderpass.h"
@@ -171,17 +171,18 @@ vulkan_renderer_backend_shutdown(renderer_backend* backend) {
     // Destroy resources in reverse order from creation
 
     // Renderpass
+    P_DEBUG("Destroying renderpass...");
     vulkan_renderpass_destroy(&context, &context.main_renderpass);
 
     // Swapchain
     vulkan_swapchain_destroy(&context, &context.swapchain);
 
     // Device
-    P_DEBUG("Destroying vulkan device");
+    P_DEBUG("Destroying vulkan device...");
     vulkan_device_destroy(&context);
 
     // Surface
-    P_DEBUG("Destroying vulkan surface");
+    P_DEBUG("Destroying vulkan surface...");
     if (context.surface) {
       vkDestroySurfaceKHR(
         context.instance,
@@ -192,7 +193,7 @@ vulkan_renderer_backend_shutdown(renderer_backend* backend) {
     }
     
     // Debugger
-    P_DEBUG("Destroying Vulkan debugger");
+    P_DEBUG("Destroying Vulkan debugger...");
     if (context.debug_messenger) {
         PFN_vkDestroyDebugUtilsMessengerEXT func = 
             (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(context.instance, "vkDestroyDebugUtilsMessengerEXT");
