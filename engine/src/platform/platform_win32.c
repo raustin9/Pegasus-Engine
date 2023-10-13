@@ -6,6 +6,7 @@
 #if P_PLATFORM_WINDOWS
 #include "core/logger.h"
 #include "core/input.h"
+#include "core/event.h"
 #include "containers/darray.h"
 #include "renderer/vulkan/vulkan_platform.h"
 #include "renderer/vulkan/vulkan_types.inl"
@@ -257,6 +258,9 @@ LRESULT CALLBACK win32_process_message(
       return 1;
     case WM_CLOSE:
       // TODO: fire an event for the application to quit
+      event_context data = {};
+      event_fire(EVENT_CODE_APPLICATION_QUIT, 0, data);
+      return TRUE;
       // DestroyWindow(hwnd);
       return 0;
       break;
