@@ -2,10 +2,12 @@
 #include "vulkan_device.h"
 #include "vulkan_swapchain.h"
 #include "vulkan_renderpass.h"
+#include "vulkan_command_buffer.h"
 #include "assert.h"
 
 #include "core/logger.h"
 #include "core/pstring.h"
+#include "core/pmemory.h"
 
 #include "containers/darray.h"
 #include "vulkan_platform.h"
@@ -22,6 +24,8 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(
     void* user_data);
 
 i32 find_memory_index(u32 type_filter, u32 property_flags);
+
+void create_command_buffers(renderer_backend* backend);
 
 b8 
 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* application_name, struct platform_state* pstate) {
@@ -162,6 +166,9 @@ vulkan_renderer_backend_initialize(renderer_backend* backend, const char* applic
         0
     );
 
+    // Create command buffers
+    create_command_buffers(backend);
+
     P_INFO("Vulkan Renderer Initialized Successfully");
     return TRUE;
 }
@@ -169,6 +176,20 @@ vulkan_renderer_backend_initialize(renderer_backend* backend, const char* applic
 void 
 vulkan_renderer_backend_shutdown(renderer_backend* backend) {
     // Destroy resources in reverse order from creation
+
+    // Command buffers
+    for (u32 i = 0; i < context.swapchain.image_count; i++) {
+        if (context.graphics_command_buffers[i].handle) {
+            vulkan_command_buffer_free(
+                &context,
+                context.device.graphics_command_pool,
+                &context.graphics_command_buffers[i]
+            );
+            context.graphics_command_buffers[i].handle = NULL;
+        }
+    }
+    darray_destroy(context.graphics_command_buffers);
+    context.graphics_command_buffers = NULL;
 
     // Renderpass
     P_DEBUG("Destroying renderpass...");
@@ -264,4 +285,38 @@ find_memory_index(u32 type_filter, u32 property_flags) {
 
     P_WARN("Unable to find suitable memory type");
     return -1;
+}
+
+void
+create_command_buffers(renderer_backend* backend) {
+    // Create a command buffer for each of our swapchain images
+    // While on image is presenting, we need to draw to the others
+    // in the swapchain. We have to use a different command buffer
+    // for each swapchain image
+    if (!context.graphics_command_buffers) {
+        context.graphics_command_buffers = darray_reserve(vulkan_command_buffer, context.swapchain.image_count);
+        for (u32 i = 0; i < context.swapchain.image_count; i++) {
+            pzero_memory(&context.graphics_command_buffers[i], sizeof(vulkan_command_buffer));
+        }
+    }
+
+    for (u32 i = 0; i < context.swapchain.image_count; i++) {
+        if (context.graphics_command_buffers[i].handle) {
+            vulkan_command_buffer_free(
+                &context,
+                context.device.graphics_command_pool,
+                &context.graphics_command_buffers[i]
+            );
+
+        }
+        pzero_memory(&context.graphics_command_buffers[i], sizeof(vulkan_command_buffer));
+        vulkan_command_buffer_allocate(
+            &context,
+            context.device.graphics_command_pool,
+            TRUE,
+            &context.graphics_command_buffers[i]
+        );
+    }
+
+    P_INFO("Graphics command buffers created");
 }
