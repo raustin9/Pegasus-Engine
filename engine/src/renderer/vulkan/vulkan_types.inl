@@ -32,6 +32,8 @@ typedef struct vulkan_device {
     VkQueue present_queue;
     VkQueue transfer_queue;
 
+    VkCommandPool graphics_command_pool;
+
     VkPhysicalDeviceProperties properties;
     VkPhysicalDeviceFeatures features;
     VkPhysicalDeviceMemoryProperties memory;
@@ -83,16 +85,16 @@ typedef struct vulkan_swapchain {
 // COMMAND BUFFERS
 typedef enum vulkan_command_buffer_state {
   COMMAND_BUFFER_STATE_READY,
-  COMMAND_BUFFER_STATE_RECORDING,
-  COMMAND_BUFFER_STATE_IN_RENDER_PASS,
+  COMMAND_BUFFER_STATE_RECORDING,       
+  COMMAND_BUFFER_STATE_IN_RENDER_PASS,  
   COMMAND_BUFFER_STATE_RECORDING_ENDED,
-  COMMAND_BUFFER_STATE_SUBMITTED,
-  COMMAND_BUFFER_STATE_NOT_ALLOCATED,
+  COMMAND_BUFFER_STATE_SUBMITTED,       
+  COMMAND_BUFFER_STATE_NOT_ALLOCATED, // cb's start here. Once allocated we switch to READY
 } vulkan_command_buffer_state;
 
 typedef struct vulkan_command_buffer {
   VkCommandBuffer handle;
-  vulkan_command_buffer_state state;
+  vulkan_command_buffer_state state; // vulkan keeps track of this internally, but we can use this for error checking/logging etc
 } vulkan_command_buffer;
 
 // Overall context around the vulkan renderer
@@ -111,6 +113,10 @@ typedef struct vulkan_context {
   vulkan_device device;
   vulkan_swapchain swapchain;
   vulkan_renderpass main_renderpass;
+
+  // darray
+  vulkan_command_buffer* graphics_command_buffers;
+
   u32 image_index;
   u32 current_frame;
 
