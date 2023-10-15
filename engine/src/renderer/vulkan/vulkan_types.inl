@@ -70,6 +70,13 @@ typedef struct vulkan_renderpass {
   u32 stencil;
 } vulkan_renderpass;
 
+typedef struct vulkan_framebuffer {
+  VkFramebuffer handle;
+  u32 attachment_count;
+  VkImageView* attachments;
+  vulkan_renderpass* renderpass;
+} vulkan_framebuffer;
+
 // Information for the swapchain
 typedef struct vulkan_swapchain {
     VkSurfaceFormatKHR image_format;
@@ -80,6 +87,7 @@ typedef struct vulkan_swapchain {
     VkImageView* views;
 
     vulkan_image depth_attachment;
+    vulkan_framebuffer* framebuffers;
 } vulkan_swapchain;
 
 // COMMAND BUFFERS

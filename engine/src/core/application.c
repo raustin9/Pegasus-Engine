@@ -179,6 +179,12 @@ application_run() {
     return TRUE;
 }
 
+void
+application_get_framebuffer_size(u32* width, u32* height) {
+    *width = app_state.width;
+    *height = app_state.height;
+}
+
 // If we got the code to quit the application, handle it
 // Otherwise return FALSE saying that we did not handle it
 b8 
