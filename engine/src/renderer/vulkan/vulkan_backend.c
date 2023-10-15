@@ -4,6 +4,7 @@
 #include "vulkan_renderpass.h"
 #include "vulkan_command_buffer.h"
 #include "vulkan_framebuffer.h"
+#include "vulkan_fence.h"
 #include "assert.h"
 
 #include "core/logger.h"
@@ -38,7 +39,7 @@ vulkan_renderer_backend_initialize(renderer_backend* backend, const char* applic
     context.find_memory_index = find_memory_index;
 
     /// TODO: create custom allocator -- for now use default
-    context.allocator = 0;
+    context.allocator = NULL;
 
     application_get_framebuffer_size(&cached_framebuffer_width, &cached_framebuffer_height);
     context.framebuffer_width = (cached_framebuffer_width != 0) ? cached_framebuffer_width : 800;
@@ -178,11 +179,37 @@ vulkan_renderer_backend_initialize(renderer_backend* backend, const char* applic
         0
     );
 
+    // Swapchain framebuffers
     context.swapchain.framebuffers = darray_reserve(vulkan_framebuffer, context.swapchain.image_count);
     regenerate_framebuffers(backend, &context.swapchain, &context.main_renderpass);
 
     // Create command buffers
     create_command_buffers(backend);
+
+    // Create sync objects
+    context.image_availale_semaphores = darray_reserve(VkSemaphore, context.swapchain.max_frames_in_flight);
+    context.queue_complete_semaphores = darray_reserve(VkSemaphore, context.swapchain.max_frames_in_flight);
+    context.in_flight_fences = darray_reserve(vulkan_fence, context.swapchain.max_frames_in_flight);
+
+    for (u32 i = 0; i < context.swapchain.max_frames_in_flight; i++) {
+        VkSemaphoreCreateInfo semaphore_create_info = {VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
+        vkCreateSemaphore(context.device.logical_device, &semaphore_create_info, context.allocator, &context.image_availale_semaphores[i]);
+        vkCreateSemaphore(context.device.logical_device, &semaphore_create_info, context.allocator, &context.queue_complete_semaphores[i]);
+
+        // Create the fence in a simplified state indicating that the first frame has already been "rendered"
+        // This prevents the application from waiting indefinitely for the first frame to render since
+        // it cannot be rendered until a frame is "rendered before it"
+        vulkan_fence_create(&context, TRUE, &context.in_flight_fences[i]);
+    }
+
+    // In flight fences should not yet exist, so clear the list. These are stored in
+    // pointers because the initial state should be 0, and will be 0 when not in use.
+    // Actual fences are not owned by this list
+    context.images_in_flight = darray_reserve(vulkan_fence, context.swapchain.image_count);
+    for (u32 i = 0; i < context.swapchain.image_count; i++) {
+        context.images_in_flight[i] = 0;
+    }
+
 
     P_INFO("Vulkan Renderer Initialized Successfully");
     return TRUE;
@@ -190,7 +217,38 @@ vulkan_renderer_backend_initialize(renderer_backend* backend, const char* applic
 
 void 
 vulkan_renderer_backend_shutdown(renderer_backend* backend) {
+    vkDeviceWaitIdle(context.device.logical_device);
     // Destroy resources in reverse order from creation
+
+    // Sync objects
+    for (u8 i = 0; i < context.swapchain.max_frames_in_flight; i++) {
+        if (context.image_availale_semaphores[i]) {
+            vkDestroySemaphore(
+                context.device.logical_device,
+                context.image_availale_semaphores[i],
+                context.allocator
+            );
+        }
+        if (context.queue_complete_semaphores[i]) {
+            vkDestroySemaphore(
+                context.device.logical_device,
+                context.queue_complete_semaphores[i],
+                context.allocator
+            );
+        }
+        vulkan_fence_destroy(&context, &context.in_flight_fences[i]);
+    }
+    darray_destroy(context.image_availale_semaphores);
+    context.image_availale_semaphores = NULL;
+
+    darray_destroy(context.queue_complete_semaphores);
+    context.queue_complete_semaphores = NULL;
+
+    darray_destroy(context.in_flight_fences);
+    context.in_flight_fences = NULL;
+
+    darray_destroy(context.images_in_flight);
+    context.images_in_flight = NULL;
 
 
     // Command buffers

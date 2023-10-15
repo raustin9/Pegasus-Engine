@@ -78,6 +78,9 @@ void vulkan_swapchain_present(
   } else if (result != VK_SUCCESS) {
     P_FATAL("Failed to present swapchain iamge");
   }
+
+  // Incriment the current frame index
+  context->current_frame = (context->current_frame + 1) % swapchain->max_frames_in_flight;
 }
 
 void 

@@ -105,6 +105,11 @@ typedef struct vulkan_command_buffer {
   vulkan_command_buffer_state state; // vulkan keeps track of this internally, but we can use this for error checking/logging etc
 } vulkan_command_buffer;
 
+typedef struct vulkan_fence {
+  VkFence handle;
+  b8 is_signaled;
+} vulkan_fence;
+
 // Overall context around the vulkan renderer
 typedef struct vulkan_context {
   u32 framebuffer_width;
@@ -124,6 +129,18 @@ typedef struct vulkan_context {
 
   // darray
   vulkan_command_buffer* graphics_command_buffers;
+
+  // darray
+  VkSemaphore* image_availale_semaphores;
+
+  // darray
+  VkSemaphore* queue_complete_semaphores;
+
+  u32 in_flight_fence_count;
+  vulkan_fence* in_flight_fences;
+
+  // Holds pointers to fences which exist and are owned elsewhere
+  vulkan_fence** images_in_flight;
 
   u32 image_index;
   u32 current_frame;
