@@ -58,7 +58,8 @@
     "windowsx.h": "c",
     "vulkan_platform.h": "c",
     "renderer_frontend.h": "c",
-    "vulkan_device.h": "c"
+    "vulkan_device.h": "c",
+    "functional": "c"
   },
   "C_Cpp_Runner.msvcBatchPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvarsall.bat",
   "C_Cpp_Runner.cCompilerPath": "gcc",
