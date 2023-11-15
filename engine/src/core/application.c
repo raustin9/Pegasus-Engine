@@ -43,14 +43,6 @@ application_create(game* game_inst) {
     initialize_logging();
     input_initialize();
 
-    // TODO: remove this
-    P_FATAL("test message: %f", 3.14f);
-    P_ERROR("test message: %f", 3.14f);
-    P_WARN("test message: %f", 3.14f);
-    P_INFO("test message: %f", 3.14f);
-    P_DEBUG("test message: %f", 3.14f);
-    P_TRACE("test message: %f", 3.14f);
-
     app_state.is_running = TRUE;
     app_state.is_suspended = FALSE;
 
@@ -179,6 +171,7 @@ application_run() {
     return TRUE;
 }
 
+// Get the dimensions (in pixels) of a framebuffer
 void
 application_get_framebuffer_size(u32* width, u32* height) {
     *width = app_state.width;
@@ -200,7 +193,7 @@ application_on_event(u16 code, void* sender, void* listener_inst, event_context 
     return FALSE;
 }
 
-
+// Callback function for keyboard input
 b8 
 application_on_key(u16 code, void* sender, void* listener_inst, event_context context) {
     P_DEBUG("application_on_key fired");

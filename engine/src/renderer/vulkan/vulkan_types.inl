@@ -114,6 +114,14 @@ typedef struct vulkan_fence {
 typedef struct vulkan_context {
   u32 framebuffer_width;
   u32 framebuffer_height;
+  
+  // Current generation of framebuffer size. If it does not match framebuffer_size_last_generation
+  // a new one should be generated
+  u32 framebuffer_size_generation;
+
+  // Keeps track of the size of the last generation of the framebuffer
+  // If this and the current one are out of sync we know we are out of date
+  u64 framebuffer_size_last_generation;
   VkInstance instance;
   VkAllocationCallbacks *allocator; // custom allocator we can use
                                     // this will be NULL for now to 

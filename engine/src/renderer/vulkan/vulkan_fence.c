@@ -40,7 +40,7 @@ vulkan_fence_wait(
   vulkan_fence* fence, 
   u64 timeout_ms
 ) {
-  if (fence->is_signaled) {
+  if (!fence->is_signaled) {
     VkResult result = vkWaitForFences(
       context->device.logical_device,
       1,
