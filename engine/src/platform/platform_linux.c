@@ -261,6 +261,11 @@ platform_pump_messages(platform_state* pstate) {
             }
             case XCB_CONFIGURE_NOTIFY: {
                 //  Resizing
+                xcb_configure_notify_event_t *configure_event = (xcb_configure_notify_t*)event;
+                event_context context;
+                context.data.u16[0] = configure_event->width;
+                context.data.u16[1] = configure_event->height;
+                event_fire(EVENT_CODE_RESIZED, NULL, context);
             } break;
             case XCB_CLIENT_MESSAGE: {
                 cm = (xcb_client_message_event_t*)event;

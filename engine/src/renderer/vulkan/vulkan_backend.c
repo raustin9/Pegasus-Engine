@@ -47,6 +47,8 @@ vulkan_renderer_backend_initialize(renderer_backend* backend, const char* applic
     application_get_framebuffer_size(&cached_framebuffer_width, &cached_framebuffer_height);
     context.framebuffer_width = (cached_framebuffer_width != 0) ? cached_framebuffer_width : 800;
     context.framebuffer_height = (cached_framebuffer_height != 0) ? cached_framebuffer_height : 600;
+    context.framebuffer_size_generation = 0;
+    context.framebuffer_size_last_generation = 0;
     cached_framebuffer_width = 0;
     cached_framebuffer_height = 0;
 
